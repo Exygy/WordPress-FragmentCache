@@ -42,8 +42,10 @@ if ( ! $cache->output() ) {
 To wrap this around a general PHP/HTML template you could use:
 
 ```php
+<?php
 $cache = new FragmentCache();
-if ( ! $cache->output() ):     
+if ( ! $cache->output() ):
+?>
   <div>
     <?php output_expensive_queries(); ?>
   </div>
