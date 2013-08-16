@@ -1,4 +1,5 @@
 === Plugin Name ===
+
 Contributors: dkexygy
 Tags: cache, caching, performance, wpengine, advanced
 Requires at least: 3.0.1
@@ -61,7 +62,9 @@ endif;
 By default, calling `new FragmentCache()` will create a key based on the current permalink URL (e.g. '/posts/12345'). To get around that, you'll have to pass a unique caching key like so:
 
 ```php
-$cache = new FragmentCache(array('key' => 'my-unique-key')); //uses unique key. NOTE: this key is global across your whole site -- so don't use the same key on a different fragment!
+// uses unique key. NOTE: this key is global across your whole site,
+// so don't use the same key with a different fragment!
+$cache = new FragmentCache(array('key' => 'my-unique-key')); 
 ```
 
 
