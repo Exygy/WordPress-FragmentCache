@@ -29,18 +29,32 @@ Usage:
  
 
 class FragmentCache {
+  const GROUP = 'fragment-cache';
+  var $filesystem = true; 
   var $key;
 
   public function __construct( $options=array() ) {
-    if ( ! file_exists(ABSPATH.'wp-content/cache/fragment-cache')) {
-      wp_mkdir_p(ABSPATH.'wp-content/cache/fragment-cache');
+    // object cache is UNTESTED! disabled for now
+    // global $_wp_using_ext_object_cache;
+    // if ($_wp_using_ext_object_cache) $this->filesystem = false; 
+
+    if ($this->filesystem) {
+      if ( ! file_exists(ABSPATH.'wp-content/cache/fragment-cache')) {
+        wp_mkdir_p(ABSPATH.'wp-content/cache/fragment-cache');
+      }      
     }
 
     $date       = isset($options['date']) ? $options['date'] : null;
-    $key        = isset($options['key']) ? $options['key'] : FragmentCache::page_cache_key($date);
+    $key        = isset($options['key']) ? $options['key'] : self::page_cache_key($date);
     $logged_in  = isset($options['logged_in']) ? intval($options['logged_in']) : 0; //convert true,false to 1,0 
 
-    $this->key = "wp-content/cache/fragment-cache/{$key}__{$logged_in}.txt";
+    $fullkey = "{$key}__{$logged_in}";
+
+    if ($this->filesystem) {
+      $this->key = "wp-content/cache/fragment-cache/$fullkey.txt";    
+    } else {
+      $this->key = $fullkey;
+    }
   }
 
   public static function page_cache_key($date=null) {
@@ -63,17 +77,29 @@ class FragmentCache {
   }
 
   public static function flush() {
-    $files = glob(ABSPATH.'wp-content/cache/fragment-cache/*'); // get all file names
-    foreach ($files as $file) { // iterate files
-      if (is_file($file)) unlink($file); // delete file
+    if ($this->filesystem) {
+      $files = glob(ABSPATH.'wp-content/cache/fragment-cache/*'); // get all file names
+      foreach ($files as $file) { // iterate files
+        if (is_file($file)) unlink($file); // delete file
+      }      
+    } else {
+      wp_cache_flush();
     }
   }
 
 
   public function output($echo=true) {
-    if (file_exists($this->key) && $cached = file_get_contents($this->key)) {
-      if ($echo) echo $cached . "\n <!-- Serving FragmentCache from: {$this->key} --> \n";;
-      return true; 
+    $cached = false; 
+    if ($this->filesystem && (file_exists($this->key))) {
+      $cached = file_get_contents($this->key);
+    } else {
+      $cached = wp_cache_get($this->key, self::GROUP);
+    }
+
+    if ($cached) {
+      // cache was found...
+      if ($echo) echo $cached . "\n <!-- Serving FragmentCache from: {$this->key} --> \n";
+      return true;
     } else {
       ob_start();
       return false;
@@ -82,13 +108,13 @@ class FragmentCache {
  
   public function store() {
     $output = ob_get_flush(); // Flushes the buffers
-    // wp_cache_add( $this->key, $output, self::GROUP, $this->ttl );
-    // $cache_data = $output;
-
-    $fh = fopen($this->key, 'w'); //or die("can't open file");
-    fwrite($fh, $output);
-    fclose($fh);
-    // return $output;
+    if ($this->filesystem) {
+      $fh = fopen($this->key, 'w'); //or die("can't open file");
+      fwrite($fh, $output);
+      fclose($fh);      
+    } else {
+      wp_cache_add($this->key, $output, self::GROUP, 3600*48);    
+    }
     return true; 
   }
 }
