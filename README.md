@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== FragmentCache ===
 
 Contributors: dkexygy
 Tags: cache, caching, performance, wpengine, advanced
