@@ -27,8 +27,7 @@ Note: Enabling this plugin does not automatically do anything for you -- you wil
 1. Edit your template(s) to include FragmentCache like so:
 
 
-```php
-<?php
+`<?php
 $cache = new FragmentCache();
 if ( ! $cache->output() ) {     
   functions_that_do_stuff_live();
@@ -36,13 +35,12 @@ if ( ! $cache->output() ) {
   // IMPORTANT
   $cache->store();
 }
-?>      
-```
+?>`
 
-To wrap this around a general PHP/HTML template you could use:
+In other words, to wrap this around a general PHP/HTML template you could use:
 
-```php
-<?php
+
+`<?php
 $cache = new FragmentCache();
 if ( ! $cache->output() ):
 ?>
@@ -53,8 +51,7 @@ if ( ! $cache->output() ):
 <?php
   $cache->store();
 endif;
-?>      
-```
+?>`
 
 
 == Frequently Asked Questions ==
