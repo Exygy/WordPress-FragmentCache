@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Fragment_Cache
- * @version 0.5
+ * @version 0.5.1
  */
 /*
 Plugin Name: Fragment Cache
 Plugin URI: http://wordpress.org/extend/plugins/
 Description: Boost your page performance by caching individual page fragments. Works with logged-in users too! 
 Author: Dave Kaplan
-Version: 0.5
+Version: 0.5.1
 Author URI: http://exygy.com/
 */
 
