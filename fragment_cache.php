@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Fragment_Cache
- * @version 0.5.1
+ * @version 0.6.0
  */
 /*
 Plugin Name: Fragment Cache
 Plugin URI: http://wordpress.org/extend/plugins/
 Description: Boost your page performance by caching individual page fragments. Works with logged-in users too! 
 Author: Dave Kaplan
-Version: 0.5.1
+Version: 0.6.0
 Author URI: http://exygy.com/
 */
 
@@ -28,17 +28,15 @@ Usage:
 */
  
 
+
 class FragmentCache {
   const GROUP = 'fragment-cache';
-  var $filesystem = true; 
+  public static $filesystem = true; 
   var $key;
 
   public function __construct( $options=array() ) {
-    // object cache is UNTESTED! disabled for now
-    // global $_wp_using_ext_object_cache;
-    // if ($_wp_using_ext_object_cache) $this->filesystem = false; 
 
-    if ($this->filesystem) {
+    if (self::$filesystem) {
       if ( ! file_exists(ABSPATH.'wp-content/cache/fragment-cache')) {
         wp_mkdir_p(ABSPATH.'wp-content/cache/fragment-cache');
       }      
@@ -50,7 +48,7 @@ class FragmentCache {
 
     $fullkey = "{$key}__{$logged_in}";
 
-    if ($this->filesystem) {
+    if (self::$filesystem) {
       $this->key = "wp-content/cache/fragment-cache/$fullkey.txt";    
     } else {
       $this->key = $fullkey;
@@ -69,7 +67,7 @@ class FragmentCache {
     if ($date) {
       $date = date('Ymd_His', strtotime($date));
     } else {
-      $date = get_the_date('Ymd_His');
+      $date = the_modified_date('Ymd_His', '', '', false);
     }
 
     $path .= '__'.$date;
@@ -77,7 +75,7 @@ class FragmentCache {
   }
 
   public static function flush() {
-    if ($this->filesystem) {
+    if (self::$filesystem) {
       $files = glob(ABSPATH.'wp-content/cache/fragment-cache/*'); // get all file names
       foreach ($files as $file) { // iterate files
         if (is_file($file)) unlink($file); // delete file
@@ -90,7 +88,7 @@ class FragmentCache {
 
   public function output($echo=true) {
     $cached = false; 
-    if ($this->filesystem && (file_exists($this->key))) {
+    if (self::$filesystem && (file_exists($this->key))) {
       $cached = file_get_contents($this->key);
     } else {
       $cached = wp_cache_get($this->key, self::GROUP);
@@ -108,7 +106,7 @@ class FragmentCache {
  
   public function store() {
     $output = ob_get_flush(); // Flushes the buffers
-    if ($this->filesystem) {
+    if (self::$filesystem) {
       $fh = fopen($this->key, 'w'); //or die("can't open file");
       fwrite($fh, $output);
       fclose($fh);      
@@ -118,6 +116,12 @@ class FragmentCache {
     return true; 
   }
 }
+
+// object cache is UNTESTED! disabled for now
+// global $_wp_using_ext_object_cache;
+// if ($_wp_using_ext_object_cache) FragmentCache::filesystem = false; 
+
+
 
 
 function plugin_menu() {
@@ -129,9 +133,9 @@ add_action('admin_menu', 'plugin_menu');
 function fragment_cache_options() {
 ?>
   <?php if ( !empty($_POST['submit'] ) ) : ?>
-  <? FragmentCache::flush(); ?>
+  <?php FragmentCache::flush() ?>
   <div id="message" class="updated fade"><p><strong><?php _e('Cache has been cleared!') ?></strong></p></div>
-  <? endif; ?>
+  <?php endif; ?>
 
   <form action="" method="post" id="frag-cache">
     <h1>Fragment Cache options:</h1>
